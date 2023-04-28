@@ -10,6 +10,6 @@ COPY . .
 
 RUN go mod download
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /leetcrawl
+RUN CGO_ENABLED=0 GOOS=linux go build ./cmd/leetcrawl/leetcrawl.go -o /leetcrawl
 
 CMD ["/leetcrawl"]
