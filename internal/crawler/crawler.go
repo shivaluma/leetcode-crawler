@@ -43,7 +43,7 @@ func (i Impl) Crawl() {
 		if len(recents) > 0 {
 			// last submissions
 			tsInt, _ := strconv.Atoi(recents[0].Timestamp)
-			if time.Unix(int64(tsInt), 0).Before(lut.LastUpdatedAt) {
+			if time.Unix(int64(tsInt), 0).Before(lut.LastUpdatedAt) || time.Unix(int64(tsInt), 0).Equal(lut.LastUpdatedAt) {
 				shouldContinue = false
 			}
 		}
@@ -66,7 +66,7 @@ func (i Impl) Crawl() {
 				tsInt, _ := strconv.ParseInt(recent.Timestamp, 10, 64)
 				ts := time.Unix(int64(tsInt), 0)
 
-				if ts.Before(lut.LastUpdatedAt) {
+				if ts.Before(lut.LastUpdatedAt) || ts.Equal(lut.LastUpdatedAt) {
 					logger.Log.Info("This submission might be updated, skip...", zap.Any("recent", recent))
 					return
 				}
