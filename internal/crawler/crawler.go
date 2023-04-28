@@ -62,12 +62,14 @@ func (i Impl) Crawl() {
 			currentIdx := idx
 			recent := recents[currentIdx]
 
-			tsInt, _ := strconv.ParseInt(recent.Timestamp, 10, 64)
-			ts := time.Unix(int64(tsInt), 0)
+			if lut != nil {
+				tsInt, _ := strconv.ParseInt(recent.Timestamp, 10, 64)
+				ts := time.Unix(int64(tsInt), 0)
 
-			if ts.Before(lut.LastUpdatedAt) {
-				logger.Log.Info("This submission might be updated, skip...", zap.Any("recent", recent))
-				return
+				if ts.Before(lut.LastUpdatedAt) {
+					logger.Log.Info("This submission might be updated, skip...", zap.Any("recent", recent))
+					return
+				}
 			}
 
 			submissionId, _ := strconv.ParseInt(recent.ID, 10, 64)
