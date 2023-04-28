@@ -6,6 +6,7 @@ type RecentAcSubmission struct {
 	TitleSlug string
 	Timestamp string
 	LangName  string
+	Lang      string
 	Runtime   string
 	Memory    string
 	Url       string
@@ -40,4 +41,8 @@ type Submission struct {
 	Notes string `json:"notes"`
 
 	LastTestcase string `json:"lastTestcase"`
+}
+
+type QuestionContent struct {
+	Content string
 }

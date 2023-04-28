@@ -13,12 +13,13 @@ import (
 	"leetcode-submission-crawler/logger"
 )
 
-type Leetcode interface {
-	GetRecentSubmissions() []entity.RecentAcSubmission
+type UseCase interface {
+	GetRecentSubmissions(size int) []entity.RecentAcSubmission
 	GetSubmissionDetail(id int64) *entity.Submission
+	GetQuestionContent(slug string) *entity.QuestionContent
 }
 
-func NewLeetcode(config *config.Config) Leetcode {
+func NewLeetcode(config *config.Config) UseCase {
 	httpClient := &http.Client{}
 
 	cookies := cookieHelper{}
@@ -53,7 +54,26 @@ type Impl struct {
 	config *config.Config
 }
 
-func (l *Impl) GetRecentSubmissions() []entity.RecentAcSubmission {
+func (l *Impl) GetQuestionContent(slug string) *entity.QuestionContent {
+	var q struct {
+		Question entity.QuestionContent `graphql:"question(titleSlug: $titleSlug)"`
+	}
+
+	variables := map[string]interface{}{
+		"titleSlug": slug,
+	}
+
+	err := l.gc.Query(context.Background(), &q, variables)
+
+	if err != nil {
+		logger.Log.Error("leetcode.GetQuestionContent", zap.Error(err))
+		return nil
+	}
+
+	return &q.Question
+}
+
+func (l *Impl) GetRecentSubmissions(limit int) []entity.RecentAcSubmission {
 
 	var q struct {
 		RecentAcSubmissionList []entity.RecentAcSubmission `graphql:"recentAcSubmissionList(username: $username, limit: $limit)"`
@@ -61,7 +81,7 @@ func (l *Impl) GetRecentSubmissions() []entity.RecentAcSubmission {
 
 	variables := map[string]interface{}{
 		"username": l.config.Leetcode.Username,
-		"limit":    20,
+		"limit":    limit,
 	}
 
 	err := l.gc.Query(context.Background(), &q, variables)
@@ -76,7 +96,7 @@ func (l *Impl) GetRecentSubmissions() []entity.RecentAcSubmission {
 func (l *Impl) GetSubmissionDetail(id int64) *entity.Submission {
 
 	var q struct {
-		SubmissionDetail entity.Submission `graphql:"submissionDetails(submissionId: $submissionId)"`
+		SubmissionDetails entity.Submission `graphql:"submissionDetails(submissionId: $submissionId)"`
 	}
 
 	variables := map[string]interface{}{
@@ -89,7 +109,7 @@ func (l *Impl) GetSubmissionDetail(id int64) *entity.Submission {
 		return nil
 	}
 
-	return &q.SubmissionDetail
+	return &q.SubmissionDetails
 }
 
 // Custom transport that adds headers to each request
@@ -125,4 +145,19 @@ func (c *cookieHelper) String() string {
 		sb.WriteString(fmt.Sprintf("%s=%s; ", sanitizeCookieName(cookie.Name), cookie.Value))
 	}
 	return sb.String()
+}
+
+func ExtensionNameMapping(name string) string {
+	switch name {
+	case "golang":
+		return "go"
+	case "java":
+		return "java"
+	case "javascript":
+		return "js"
+	case "ruby":
+		return "rb"
+	default:
+		return name
+	}
 }

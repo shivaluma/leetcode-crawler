@@ -11,5 +11,8 @@ func InitLogger() {
 }
 
 func Sync() {
-	Log.Sync()
+	err := Log.Sync()
+	if err != nil {
+		return
+	}
 }

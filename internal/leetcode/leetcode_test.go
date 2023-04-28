@@ -15,7 +15,7 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-var leetcode Leetcode
+var leetcode UseCase
 
 func NewLeetcodeInstance() {
 	var mockConfig = &config.Config{

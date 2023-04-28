@@ -4,15 +4,38 @@ services:
   postgres:
     container_name: leetsync_db
     image: postgres:latest
+    networks:
+      - leetcrawl
     environment:
       POSTGRES_USER: shivaluma
       POSTGRES_PASSWORD: shivaluma
+      POSTGRES_DB: leetcrawl
       PGDATA: /data/postgres
     volumes:
       - postgres-db:/data/postgres
     ports:
       - "5432:5432"
-
+  migrate:
+    image: migrate/migrate
+    networks:
+      - leetcrawl
+    volumes:
+      - .:/migrations
+    command: [ "-path", "/migrations", "-database",  "postgres://shivaluma:shivaluma@postgres:5432/leetcrawl?sslmode=disable", "up", "3" ]
+    links:
+      - postgres
+  leetcrawl:
+    container_name: leetcrawl
+    build: .
+    networks:
+      - leetcrawl
+    volumes:
+      - /data/leetcrawl:/app/config
+    environment:
+      CONFIG_NAME: config.local
+      CONFIG_DIRECTORY: /app/config
 volumes:
   postgres-db:
     driver: local
+networks:
+  leetcrawl:
