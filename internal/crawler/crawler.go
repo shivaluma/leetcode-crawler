@@ -123,7 +123,7 @@ func (i Impl) Crawl() {
 			}
 
 			// update last updated timestamp
-			i.repo.Lastupdatedtimestamp.Upsert(i.config.Leetcode.Username, i.config.Github.Username, time.Unix(int64(submission.Timestamp), 0))
+			i.repo.Lastupdatedtimestamp.Upsert(i.config.Leetcode.Username, i.config.Github.Username, time.Unix(int64(submission.Timestamp)+5, 0))
 		}
 
 		i.wp.Enqueue(task)
